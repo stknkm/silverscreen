@@ -1,0 +1,114 @@
+version: 2
+
+models:
+  - name: rental_all
+    description: >
+      Aggregated rental cost data from raw invoice records.
+      Each row represents the total rental cost per movie, per location, and per month.
+    columns:
+      - name: movie_id
+        description: Unique identifier of the movie.
+        tests:
+          - not_null
+          
+
+      - name: month
+        description: The month in which the rental took place, truncated to the first day of the month.
+        tests:
+          - not_null
+
+      - name: location
+        description: Identifier of the cinema location where the movie rental was registered.
+        tests:
+          - not_null
+
+      - name: total_rental
+        description: Total rental cost for a specific movie at a location in a given month.
+        tests:
+          - not_null
+          - dbt_utils.expression_is_true:
+              expression: "{{ total_rental }} >= 0"
+  
+
+
+  - name: transactions_all
+    description: >
+      Combined transactional data from all cinema locations.
+      This model unifies transactions from three different sources and standardizes them into a single format for further analysis.
+    columns:
+      - name: movie_id
+        description: Unique identifier of the movie.
+        tests:
+          - not_null
+         
+
+      - name: month
+        description: The month of the transaction, truncated to the first day of the month.
+        tests:
+          - not_null
+
+      - name: location
+        description: Location identifier of the cinema.
+        tests:
+          - not_null
+
+      - name: ticket_amount
+        description: Number of tickets sold for a movie at a location in a given month.
+        tests:
+          - not_null
+          - dbt_utils.expression_is_true:
+              expression: "{{ ticket_amount }} >= 0"
+
+      - name: transaction_total
+        description: Total revenue generated from ticket sales for a movie at a specific location and month.
+        tests:
+          - not_null
+          - dbt_utils.expression_is_true:
+              expression: "{{ transaction_total }} >= 0"      
+
+ 
+  - name: transactions_and_rental_combined
+    description: >
+      This model enriches transaction data with rental cost information for each movie, month, and location.
+      If the rental cost is missing for a particular month, it is filled using the value from the previous month (if available).
+      This ensures completeness of financial metrics for downstream reporting and analysis.
+
+    columns:
+      - name: movie_id
+        description: Unique identifier for each movie.
+        tests:
+          - not_null
+          
+
+      - name: month
+        description: The month of the transaction.
+        tests:
+          - not_null
+
+      - name: location
+        description: Location identifier where the transaction occurred.
+        tests:
+          - not_null
+
+      - name: ticket_amount
+        description: Total number of tickets sold for the movie in a given month and location.
+        tests:
+          - not_null
+          - dbt_utils.expression_is_true:
+              expression: "{{ ticket_amount }} >= 0"
+
+      - name: transaction_total
+        description: Total revenue generated from ticket sales.
+        tests:
+          - not_null
+          - dbt_utils.expression_is_true:
+              expression: "{{ transaction_total }} >= 0"
+
+      - name: total_rental_filled
+        description: >
+          Rental cost of the movie for the given month and location.
+          If the original rental value was missing, this field contains the value from the previous month.
+        tests:
+          - not_null
+          - dbt_utils.expression_is_true:
+              expression: "{{ total_rental_filled }}>= 0"                  

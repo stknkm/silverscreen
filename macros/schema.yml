@@ -1,0 +1,5 @@
+version: 2
+
+macros:
+  - name: get_month
+    description: "Returns the month part of a given date using the `date_trunc('month', ...)` function."
