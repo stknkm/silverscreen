@@ -1,0 +1,63 @@
+version: 2
+
+models:
+  - name: mart_movies
+    description: >
+      Final MART model combining enriched movie catalogue data with monthly revenue,
+      ticket sales, and rental costs per movie, per location, per month.
+      This model is designed for reporting and analytics of movie performance.
+
+    columns:
+      - name: movie_id
+        description: Unique identifier for the movie.
+        tests:
+          - not_null
+
+      - name: movie_title
+        description: Title of the movie.
+        tests:
+          - not_null
+
+      - name: genre
+        description: Genre of the movie (e.g., Action, Comedy, Drama).
+        tests:
+          - not_null
+
+      - name: studio
+        description: Studio or production company responsible for the movie.
+        tests:
+          - not_null
+
+      - name: month
+        description: Month of the financial record (e.g., '2024-04').
+        tests:
+          - not_null
+
+      - name: location
+        description: Cinema location 
+        tests:
+          - not_null
+
+      - name: rental_cost
+        description: >
+          Rental cost charged for the movie in a specific month and location.
+          Filled with previous month's value if not originally available.
+        tests:
+          - not_null
+          - dbt_utils.expression_is_true:
+              expression: "{{ rental_cost }}>= 0"
+
+      - name: tickets_sold
+        description: Total number of tickets sold for the movie in the specified period and location.
+        tests:
+          - not_null
+          - dbt_utils.expression_is_true:
+              expression: "{{ tickets_sold }}>= 0"
+
+      - name: revenue
+        description: Total revenue generated from ticket sales.
+        tests:
+          - not_null
+          - dbt_utils.expression_is_true:
+              expression: "{{ revenue }}>= 0"
+

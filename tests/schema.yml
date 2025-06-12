@@ -1,0 +1,17 @@
+version: 2
+
+tests:
+   - name: test_revenue_but_no_tickets
+     description: "Checks for records where revenue exists but no tickets are recorded."
+     meta:
+      model: mart_movies
+  
+   - name: test_tickets_but_no_revenue
+     description: "Checks for records where tickets exists but no revenue are recorded."
+     meta:
+      model: mart_movies
+
+   - name: test_duplicate_keys
+     description: "Checks for duplicate records by movie_id, month, and location."
+     meta:
+      model: mart_movies
